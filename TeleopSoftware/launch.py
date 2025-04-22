@@ -7,9 +7,9 @@ from tkinter import ttk
 import time
 
 from UR.arms import *
-from opt import UR5eForceControl
-from run import *
-from tk_functions import *
+from launch_helpers.opt import UR5eForceControl
+from launch_helpers.run import *
+from launch_helpers.tk_functions import *
 
 # import rospy
 # from std_msgs.msg import Float32MultiArray, String, Bool, Float32, Int32
@@ -35,8 +35,9 @@ class GUI(Node):
         # rospy.Subscriber("/SpaceMouseThunderLog", Float32MultiArray, lambda data: globals().update({'thunder_data': data.data}))
 
 
-        thunder_ip = "192.168.0.101"
-        lightning_ip = "192.168.0.102"
+        thunder_ip = "10.33.55.89"
+        lightning_ip = "10.33.55.90"
+
         arms = ["Thunder", "Lightning"]
         ips = [thunder_ip, lightning_ip]
         enable_control = {
