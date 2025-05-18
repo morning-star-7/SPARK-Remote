@@ -18,7 +18,7 @@ from camera import RealSenseCamera
 
 
 # data collection settings
-save_dir = "./data/test/"
+save_dir = "./real_world_data/test/"
 LANG_INSTRUCTION = "pick the green block into the black bowl."
 os.makedirs(save_dir, exist_ok=True)
 step_hz = 10
