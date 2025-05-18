@@ -76,11 +76,11 @@ class GUI(Node):
         colors = ["light blue", "light green"]
         spark_homes = [(+0.000, -1.15192, -2.26893, 0.244346, +1.5708, +0.000), # Thunder Not used
                 (+0.000, -2.1293, 2.44346, -3.49066, -1.5708, +0.000)] # Lightning Not used
-        # ur_homes = [(-180, -130, 130, -180, -90, 0), # Thunder
-        #            (-180, -50, -130, -0, 90, +0)] # Lightning
+        ur_homes = [(-180, -130, 130, -180, -90, 0), # Thunder
+                   (-180, -50, -130, -0, 90, +0)] # Lightning
 
-        ur_homes = [(-180, -130, 130, -180, -90, -90), # Thunder
-                    (-180, -50, -130, -0, 90, +90)] # Lightning
+        # ur_homes = [(-180, -130, 130, -180, -90, -90), # Thunder
+        #             (-180, -50, -130, -0, 90, +90)] # Lightning
         
         col = {}
         homes = {}

@@ -37,14 +37,14 @@ def ros_update(fields, ros_data, control_modes, URs, pubs, optimize):
             if arm.lower()+'_spark_angle' in ros_data:
                 angles = ros_data[arm.lower()+'_spark_angle']
                 if ros_data[arm.lower() + '_change_mode'] == True:
-                    # if arm == "Thunder":
-                    #     homes[arm] = [-np.pi, -np.pi/2, 0.0, -np.pi/2, -np.pi, 0.0, 0.0]
-                    # elif arm == "Lightning":
-                    #     homes[arm] = [0.0, -np.pi/2, 0.0, -np.pi/2, 0.0, 0.0, 0.0]
                     if arm == "Thunder":
-                        homes[arm] = [-np.pi, -np.pi/2, 0.0, -np.pi/2, -np.pi, -1/2*np.pi, 0]
+                        homes[arm] = [-np.pi, -np.pi/2, 0.0, -np.pi/2, -np.pi, 0.0, 0.0]
                     elif arm == "Lightning":
-                        homes[arm] = [0.0, -np.pi/2, 0.0, -np.pi/2, 0.0, 1/2*np.pi, 0]
+                        homes[arm] = [0.0, -np.pi/2, 0.0, -np.pi/2, 0.0, 0.0, 0.0]
+                    # if arm == "Thunder":
+                    #     homes[arm] = [-np.pi, -np.pi/2, 0.0, -np.pi/2, -np.pi, -1/2*np.pi, 0]
+                    # elif arm == "Lightning":
+                    #     homes[arm] = [0.0, -np.pi/2, 0.0, -np.pi/2, 0.0, 1/2*np.pi, 0]
                     dq = [a-u+h for a, u, h in zip(angles, URs.getActualQ(arm), homes[arm])]
                     # print("Diff: ", dq)
                     # print("Home: ", homes[arm])
