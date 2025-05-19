@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import cv2
 import numpy as np
+import sys
 
 # ====== 1. Load the .pkl file ======
 def load_trajectory(pkl_path):
@@ -21,8 +22,8 @@ def print_summary(traj):
     print(f"Total frames: {len(frames)}")
 
     if frames:
-        for i in range(len(frames)):
-            sample_frame = frames[i]  # Prevent index error if too few frames
+        for i in range(len(frames)-1, len(frames)):
+            sample_frame = frames[i]
             print("\nExample frame keys:", list(sample_frame.keys()))
             print("RGB image shape:", sample_frame['rgb'].shape)
             print("Joint positions:", sample_frame['joint_positions'])
@@ -64,13 +65,12 @@ def play_and_save_video(traj, save_path='output_video.mp4', fps=10):
     cv2.destroyAllWindows()
     print(f"Video saved to {save_path}")
 
-
-
 # ====== Main ======
 if __name__ == "__main__":
-    # your pkl file path
-    # pkl_path = "/home/cui00191/projects/openvla/data/raw/trajectories_green/traj_1747110025.pkl"
-    pkl_path = '/home/hanchen/projects/SPARK-Remote/data/test/traj_1747601173.pkl'
+    if len(sys.argv) > 1:
+        pkl_path = sys.argv[1]
+    else:
+        pkl_path = input("Please enter the path to the .pkl file: ")
 
     if not os.path.exists(pkl_path):
         print(f"File not found: {pkl_path}")
