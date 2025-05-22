@@ -3,6 +3,8 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32, Float32MultiArray, Int32
+from rclpy.executors import MultiThreadedExecutor
+import threading
 import time
 import pickle
 import os
@@ -14,6 +16,7 @@ import cv2
 
 from cv_bridge import CvBridge
 from camera import RealSenseCamera
+import numpy as np
 
 
 
@@ -66,12 +69,59 @@ class StateSubscriber(Node):
         self.gripper_value = msg.data
 
 
+# ============= preprocess function ===========
+def preprocess_frame(frames):
+    if len(frames) < 2:
+        return
+
+    pos_list = []
+    rpy_list = []
+    gripper_list = []
+
+    for frame in frames:
+        eef_pose = frame["eef_pose"]
+        pos_list.append(eef_pose["position"])
+        rpy_list.append(eef_pose["orientation_rpy"])
+        gripper_list.append(frame.get("gripper_state", 0))  # Default to 0 if gripper_state is missing
+
+    normalized_gripper_list = [x / 255.0 for x in gripper_list] # Normalize gripper state to [0, 1]
+    actions = compute_eef_action(pos_list, rpy_list, normalized_gripper_list)
+
+    # print('actions:', actions)
+    
+    # only save N-1 frames
+    frames = frames[:len(actions)]
+
+    for i in range(len(frames)):
+        frames[i]["action"] = actions[i].tolist()
+
+    return frames
+
+def compute_eef_action(pos_list, rpy_list, gripper_list):
+    pos = np.array(pos_list)  # shape (N, 3)
+    rpy = np.array(rpy_list)  # shape (N, 3)
+    gripper = np.array(gripper_list).reshape(-1, 1)  # shape (N, 1)
+
+    d_pos = np.diff(pos, axis=0)  # shape (N-1, 3)
+    d_rpy = np.diff(rpy, axis=0)  # shape (N-1, 3)
+    d_gripper = np.diff(gripper, axis=0)  # shape (N-1, 1)
+
+    return np.hstack([d_pos, d_rpy, d_gripper])  # shape (N-1, 7)
+
+
+
 # ========== main function ==========
 
 rclpy.init()
 state_sub = StateSubscriber()
 cam = RealSenseCamera()
 
+
+# # Start MultiThreadedExecutor in a background thread
+# executor = MultiThreadedExecutor(num_threads=4)
+# executor.add_node(state_sub)
+# executor_thread = threading.Thread(target=executor.spin, daemon=True)
+# executor_thread.start()
 
 def main():
     recording = False
@@ -95,6 +145,8 @@ def main():
 
             elif key == 'e' and recording:
                 print("[INFO] Stop recording. Saving...")
+                # frames processing: (1) gripper state normalization, (2) compute eef action
+                frames = preprocess_frame(frames)
                 save_trajectory(frames, traj_id)
                 traj_id = int(time.time())
                 recording = False
@@ -107,7 +159,10 @@ def main():
 
             now = time.time()
             if recording and (now - last_step_time) >= step_dt:
-                rclpy.spin_once(state_sub, timeout_sec=0.01)
+                for i in range(3): # 3 times to ensure we get the latest state, still need to be improved.
+                    rclpy.spin_once(state_sub, timeout_sec=0.01)
+                # print('time:', now-last_step_time)
+                # print(state_sub.eef_pose, state_sub.joint_positions, state_sub.gripper_value)
                 frame = collect_one_frame()
                 if frame is not None:
                     frames.append(frame)
